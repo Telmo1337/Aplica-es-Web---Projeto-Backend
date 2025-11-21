@@ -12,10 +12,10 @@ services:
       - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost --silent"]
-      interval: 10s
-      timeout: 10s
+      interval: 5s
+      timeout: 5s
       retries: 20
-      start_period: 40s
+      start_period: 25s
     networks:
       - aw-network
 
