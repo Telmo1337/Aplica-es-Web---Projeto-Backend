@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 <p align="center">
   <img src="cinexio.svg" alt="Cinexio Logo" width="180" />
 </p>
 # Web Applications - Movie & Series Management API
+=======
+# CINEXIO - Web Applications Movie & Series Management API 
+>>>>>>> 2590b2dbae093e9eb62f6c7ec6bbf2a7fed23db6
 Backend Project using Node, Express, Prisma ORM and MySQL (Dockerized).
 
 
@@ -48,11 +52,13 @@ sudo systemctl start docker
 
 ```bash
 
-git clone https://github.com/Telmo1337/Aplica-es-Web---Projeto-Backend
+git clone https://github.com/Telmo1337/Cinexio-AW
 
-//and after
+```
+And after you clone go to the project directory:
 
-cd Aplica-es-Web---Projeto-Backend
+```bash
+cd movies-series-api
 ```
 
 ---
@@ -110,10 +116,18 @@ This project includes a Postman collection containing all API endpoints, as well
 
 ### How to use it:
 1. Open Postman (or the Postman extension in VS Code);
-2. Import the file `postman/collection/ProjetoAW - FILMES-SÉRIES.postman_collection.json`
-3. Import the file `postman/collection/ProjetoAW - FILMES-SÉRIES.postman_environment.json`
+2. Import the file `postman/collection/Cinexio - Movies&TVshows API - collection.postman_collection.json`
+3. Import the file `postman/collection/Cinexio - Movies&TVshows API - env.postman_environment.json`
 4. Set the Environment as active
 5. Register and Run the Login endpoint to automatically generate and save the token and other variables.
+
+
+### **Collection**
+<img src="https://github.com/user-attachments/assets/e9806e97-d2a8-4920-9206-7b5aa2f89245" width="300" />
+
+### **Environment Variables**
+<img src="https://github.com/user-attachments/assets/c46359b8-e84a-4d4a-ac27-af634695c8f8" width="300" />
+
 
 ---
 
@@ -149,6 +163,36 @@ npm run projectAW-stop
 - Works on any OS;
 - Everything runs automatically with Docker Compose;
 - **DO NOT** run the backend manually with Node/npm;
-- The database is recreated fresh every time due to the -v flag (volume removed).
+
+---
+
+## Important to know:
+
+Both cmds `npm run projectAW` and `npm run projectAW-stop` use the `docker compose down -v` flag.
+The `-v` flag forces Docker to remove all volumes associated with the containers.
+
+**This means:**
+- The **database is deleted and recreated from scratch every time** you start or stop the project using these cmds.
+- All stored data (users, media, comments, etc.) is erased because the database volume is destroyed.
+
+This behaviour is intentional for development:
+- It guarantees a fully clean environment on every run, avoiding conflicts with cached data, old migrations or inconsistent states.
+
+### If you do NOT want the database to reset every time:
+
+- You must remove the `-v` flag from the scripts in the `package.json`.
+
+Example:
+```json
+{
+ "scripts": {
+    "projectAW": "docker compose down && docker compose up -d --build",
+    "projectAW-stop": "docker compose down"
+  }
+}
+```
+**By removing `-v`, the database volume becomes persistent and the data will no longer be wiped between runs.**
+
+---
 
 © 2025 – Academic project develop by Telmo Regalado and Tiago Silva
