@@ -7,6 +7,7 @@ const mediaRouter = Router();
 
 
 //schema para criação
+//schema for creation
 const mediaSchema = z.object({
     title: z.string().min(1, "Title is required"),
     type: z.enum(["MOVIE", "SERIES"]),
@@ -20,6 +21,7 @@ const mediaSchema = z.object({
 
 
 //schema para atualização
+//schema for update
 const mediaUpdateSchema = z.object({
     title: z.string().min(1, "Title is required").optional(),
     type: z.enum(["MOVIE", "SERIES"]).optional(),
@@ -36,21 +38,32 @@ const commentSchema = z.object({
 
 
 //encontrar filme ou serie por categoria
+//find movie or series by category
 mediaRouter.get("/bycategory", verifyToken, async (req, res, next) => {
   try {
+
+    //obter categoria da query
+    //get category from query
     const { category } = req.query;
 
+    //se não existir, erro
+    //if not exist, error
     if (!category || category.trim() === "") {
       return res.status(400).json({ err: "category query parameter is required" });
     }
 
+    //obter todos os media
+    //get all media
     const media = await prisma.media.findMany();
 
     // filtrar em javascript (ja que o prisma nao suporta arrays em queries)
+    // filter in javascript (since prisma does not support arrays in queries)
     const filtered = media.filter(item => 
       Array.isArray(item.category) && item.category.includes(category)
     );
 
+    //retornar resultados
+    //return results
     res.json({
       success: true,
       count: filtered.length,
@@ -58,6 +71,8 @@ mediaRouter.get("/bycategory", verifyToken, async (req, res, next) => {
     });
 
   } catch (err) {
+    //erro ao obter media por categoria
+    //error getting media by category
     next(err);
   }
 });
@@ -65,18 +80,31 @@ mediaRouter.get("/bycategory", verifyToken, async (req, res, next) => {
 
 
 // Criar comentário para um media
+// Create comment for a media
 mediaRouter.post("/:mediaId/comments", verifyToken, async (req, res, next) => {
   try {
+
+    //validar dados
+    //validate data
     const parse = commentSchema.safeParse(req.body);
+
+    //se dados invalidos, retornar erro
+    //if data invalid, return error
     if (!parse.success) {
       return res.status(400).json({ errors: parse.error.flatten().fieldErrors });
     }
 
+    //verificar se o media existe
+    //check if media exists
     const { mediaId } = req.params;
-
     const media = await prisma.media.findUnique({ where: { id: mediaId } });
+    
+    //se media não existir, erro
+    //if media does not exist, error
     if (!media) return res.status(404).json({ err: "Media not found" });
 
+    //criar comentário
+    //create comment
     const comment = await prisma.comment.create({
       data: {
         content: parse.data.content,
@@ -85,48 +113,66 @@ mediaRouter.post("/:mediaId/comments", verifyToken, async (req, res, next) => {
       },
     });
 
+    //retornar comentário criado
+    //return created comment
     res.status(201).json(comment);
   } catch (err) {
+    //erro ao criar comentário
+    //error creating comment
     next(err);
   }
 });
 
-// Listar comentários de um media
+// Lista de comentários de um media
+// List comments of a media
 mediaRouter.get("/:mediaId/comments", async (req, res, next) => {
   try {
+    //obter comentários
+    //get comments
     const comments = await prisma.comment.findMany({
       where: { mediaId: req.params.mediaId },
       include: { user: { select: { id: true, nickName: true } } },
     });
 
+    //retornar comentários
+    //return comments
     res.json(comments);
   } catch (err) {
+    //erro ao obter comentários
+    //error getting comments
     next(err);
   }
 });
 
 
 //criar filme/serie
+//create movie/series
 mediaRouter.post("/", verifyToken, async (req, res, next) => {
     try {
         //validar dados
+        //validate data
         const result = mediaSchema.safeParse(req.body);
-        //se dados validos, criar na bd
+        
+        //se dados inválidos, retornar erro
+        //if data invalid, return error
         if (!result.success) {
             return res.status(400).json({ errors: result.error.errors });
         }
 
         //verificar se o media ja existe
+        //check if media already exists
         const existingMedia = await prisma.media.findFirst({
             where: { title: result.data.title }
         })
 
-
-
+        //se ja existir, retornar erro
+        //if already exists, return error
         if (existingMedia) {
             return res.status(400).json({ err: "Media already exists" })
         }
 
+        //criar media
+        //create media
         const media = await prisma.media.create({
             data: {
                 ...result.data,
@@ -139,17 +185,24 @@ mediaRouter.post("/", verifyToken, async (req, res, next) => {
             }
         });
 
+        //retornar media criado
+        //return created media
         res.status(201).json(media);
     } catch (err) {
+        //erro ao criar media
+        //error creating media
         next(err);
     }
 })
 
 
 //ver todos filmes/series
+//view all movies/series
 mediaRouter.get("/", verifyToken, async (req, res, next) => {
     try {
-        //buscar na bd
+        
+        //obter todos os media
+        //get all media
         const mediaList = await prisma.media.findMany({
             include: {
                 user: {
@@ -158,9 +211,13 @@ mediaRouter.get("/", verifyToken, async (req, res, next) => {
             },
             orderBy: { createdAt: 'desc' },
         });
-        //retornar dados
+        
+        //retornar lista de media
+        //return media list
         res.json(mediaList);
     } catch (err) {
+        //erro ao obter lista de media
+        //error getting media list
         next(err);
     }
 });
@@ -168,37 +225,56 @@ mediaRouter.get("/", verifyToken, async (req, res, next) => {
 
 
 //ver filme/serie por titulo
+//view movie/series by title
 mediaRouter.get("/search", verifyToken, async (req, res, next) => {
     try {
+
+        //obter título da query
+        //get title from query
         const { title } = req.query;
 
+        //se não existir, erro
+        //if not exist, error
         if (!title || title === 'undefined' || title === "null" || title.trim() === "") {
             return res.status(400).json({ err: "Title query parameter is required" });
         }
 
+        //obter media
+        //get media
         const media = await prisma.media.findMany({
             where: { title: { contains: title } },
             include: { user: { select: { id: true, nickName: true } } },
             orderBy: { createdAt: 'desc' },
         });
 
+        //se não existir, erro
+        //if not exist, error
         if (media.length === 0) {
             return res.status(404).json({ err: `Media not found ${title}` });
         }
 
+
+        //retornar media
+        //return media
         res.json(media);
     } catch (err) {
+        //erro ao obter media por título
+        //error getting media by title
         next(err);
     }
 })
 
 //ver filme/serie por id
+//view movie/series by id
 mediaRouter.get("/:id", verifyToken, async (req, res, next) => {
     try {
 
+        //obter id dos params
+        //get id from params
         const { id } = req.params;
 
-        //ir a bd
+        //verificar se o media existe
+        //check if media exists
         const media = await prisma.media.findUnique({
             where: { id },
             include: {
@@ -211,86 +287,121 @@ mediaRouter.get("/:id", verifyToken, async (req, res, next) => {
             }
         });
 
+        //se não existir, erro
+        //if not exist, error
         if (!media) {
             return res.status(404).json({ err: "Media not found" });
         }
 
+        //retornar media
+        //return media
         res.json(media);
 
     } catch (err) {
+        //erro ao obter media por id
+        //error getting media by id
         next(err);
     }
 })
 
 //atualizar filme/serie
+//update movie/series
 mediaRouter.put("/:id", verifyToken, async (req, res, next) => {
     try {
 
+        //obter id dos params
+        //get id from params
         const { id } = req.params;
+        //validar dados
+        //validate data
         const result = mediaUpdateSchema.safeParse(req.body);
+        //se dados inválidos, retornar erro
+        //if data invalid, return error
         if (!result.success) {
             return res.status(400).json({ errors: result.error.errors });
         }
 
-        const media = await prisma.media.findUnique({
-            where: { id }
-        })
-
-        if (!media) {
-            return res.status(404).json({ err: "Media not found" });
-        }
-
-        if (media.userId !== req.user.id) {
-            return res.status(403).json({ err: "You are not authorized to update this media" });
-        }
-
-        const updatedMedia = await prisma.media.update({
-            where: { id },
-            data: result.data,
-        });
-
-        res.json(updatedMedia);
-
-    } catch (err) {
-        next(err);
-    }
-})
-
-
-
-//delete filme/serie
-mediaRouter.delete("/:id", verifyToken, async (req, res, next) => {
-    try {
-
-        const { id } = req.params;
-
         //verificar se o media existe
+        //check if media exists
         const media = await prisma.media.findUnique({
             where: { id }
         })
-
+        //se não existir, erro
+        //if not exist, error
         if (!media) {
             return res.status(404).json({ err: "Media not found" });
         }
 
         //verificar se o user é o criador do media
+        //check if user is the creator of the media
+        if (media.userId !== req.user.id) {
+            return res.status(403).json({ err: "You are not authorized to update this media" });
+        }
+
+        //atualizar media
+        //update media
+        const updatedMedia = await prisma.media.update({
+            where: { id },
+            data: result.data,
+        });
+
+        //retornar media atualizado
+        //return updated media
+        res.json(updatedMedia);
+
+    } catch (err) {
+        //erro ao atualizar media
+        //error updating media
+        next(err);
+    }
+})
+
+
+//apagar filme/serie
+//delete movie/series
+mediaRouter.delete("/:id", verifyToken, async (req, res, next) => {
+    try {
+
+        //obter id dos params
+        //get id from params
+        const { id } = req.params;
+
+        //verificar se o media existe
+        //check if media exists
+        const media = await prisma.media.findUnique({
+            where: { id }
+        })
+
+        //se não existir, erro
+        //if not exist, error
+        if (!media) {
+            return res.status(404).json({ err: "Media not found" });
+        }
+
+        //verificar se o user é o criador do media
+        //check if user is the creator of the media
         if (media.userId !== req.user.id && req.user.role !== "ADMIN") {
             return res.status(403).json({ err: "You are not authorized to delete this media" });
         }
 
-        //apagar media
+        //apagar associações na userMedia e comments primeiro
+        //delete associations in userMedia and comments first
         await prisma.userMedia.deleteMany({
             where: { mediaId: id }
         });
-        //apagar comentarios associados
+    
         await prisma.comment.deleteMany({
             where: { mediaId: id }
         });
-        //apagar o media
+  
+        //apagar media
+        //delete media
         await prisma.media.delete({
             where: { id }
         });
 
+        //retornar sucesso
+        //return success
         res.status(200).json({
             message: "Media deleted successfully",
             deletedMedia: {
@@ -304,6 +415,8 @@ mediaRouter.delete("/:id", verifyToken, async (req, res, next) => {
 
 
     } catch (err) {
+        //erro ao apagar media
+        //error deleting media
         next(err);
     }
 })

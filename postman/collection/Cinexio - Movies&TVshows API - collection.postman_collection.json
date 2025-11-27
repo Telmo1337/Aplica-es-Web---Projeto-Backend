@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "d97f8ab2-89c2-4575-85f9-95896f1e4e8b",
 		"name": "Cinexio - Movies&TVshows API - collection",
-		"description": "StartFragment\n\nCinexio is a RESTful API designed for managing movies and TV shows, including user authentication, personal libraries, comments, ratings, and media discovery.  \n  \nThis Postman collection contains all endpoints required to interact with the Cinexio backend, organized into clear sections for easy testing.\n\n### **Features Included**\n\n- **User Authentication**  \n      \n    Register, login, and retrieve user information using JWT-based authentication.\n    \n- **Media Management**  \n      \n    Create, list, search, update, and delete movies or TV shows.  \n      \n    Includes filtering by category, searching by title, and retrieving media by creator.\n    \n- **Personal Library**  \n      \n    Add media to a user’s library, mark as favorite or watched, schedule viewing dates, manage notes, and retrieve library statistics.\n    \n- **Comments System**  \n      \n    Add comments, edit or delete them, list comments by media or by user.\n    \n\n### **Usage**\n\n1. Authenticate using the **Login** endpoint.\n    \n2. The JWT token is stored automatically in `{{token}}`.\n    \n3. Use authenticated routes under the **REQ – ONLY AUTHENTICATED** folder.\n    \n4. All dynamic values (mediaId, commentId, userId, etc.) are stored automatically in environment variables.\n    \n\nEndFragment",
+		"description": "StartFragment\n\nCinexio is a RESTful API designed for managing movies and TV shows, including user authentication, personal libraries, comments, ratings, and media discovery.\n\nThis Postman collection contains all endpoints required to interact with the Cinexio backend, organized into clear sections for easy testing.\n\n### **Features Included**\n\n- **User Authentication**Register, login, and retrieve user information using JWT-based authentication.\n- **Media Management**Create, list, search, update, and delete movies or TV shows.Includes filtering by category, searching by title, and retrieving media by creator.\n- **Personal Library**Add media to a user’s library, mark as favorite or watched, schedule viewing dates, manage notes, and retrieve library statistics.\n- **Comments System**\n    Add comments, edit or delete them, list comments by media or by user.\n    \n\n### **Usage**\n\n1. Authenticate using the **Login** endpoint.\n2. The JWT token is stored automatically in `{{token}}`.\n3. Use authenticated routes under the **REQ – ONLY AUTHENTICATED** folder.\n4. All dynamic values (mediaId, commentId, userId, etc.) are stored automatically in environment variables.\n    \n\nEndFragment",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "33211120"
 	},
@@ -416,6 +416,32 @@
 				{
 					"name": "/library",
 					"item": [
+						{
+							"name": "PUBLIC ROUTE",
+							"item": [
+								{
+									"name": "GET - public library",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseURL}}/api/v1/library/user/{{nickName}}",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"library",
+												"user",
+												"{{nickName}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
 						{
 							"name": "GET - stats",
 							"request": {
