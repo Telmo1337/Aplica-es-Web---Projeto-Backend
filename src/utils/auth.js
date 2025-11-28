@@ -2,6 +2,7 @@
 //import libraries
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { forbidden, unauthorized } from "./errors.js";
 
 //funções de segurança e autenticação
 //security and authentication functions
@@ -27,15 +28,13 @@ export function generateToken(payload) {
 
     //payload: object com dados a codificar no token
     //payload: object with data to encode in the token
-    const token = jwt.sign(
+    return jwt.sign(
         { id: payload.id, email: payload.email, role: payload.role, nickName: payload.nickName }, //dados codificados
         process.env.JWT_SECRET, // secret key do .env // secret key from .env
         { expiresIn: "7d" } //tempo de validade do token // token validity time
     )
 
 
-    console.log("Token created: ", token)
-    return token;
 }
 
 
@@ -88,5 +87,3 @@ export function requireAdmin(req, res, next) {
     }
     next();
 }
-
-
