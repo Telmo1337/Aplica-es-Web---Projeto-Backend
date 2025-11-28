@@ -1,26 +1,21 @@
 // Controller: recebe pedidos HTTP e delega para a camada de serviços
 
 import {
-  getUserProfileService,
-  getAllUsersService,
-  getUserMediaService,
-  updateUserProfileService,
-  updateUserPrivacyService,
-  updateUserAvatarService
-} from "../services/user.service.js";
+  registerUser,
+  loginUser,
+  logoutUser,
+  forgotPasswordService,
+  resetPasswordService
+} from "../services/auth.service.js";
 
 
 // ============================
-// VER PERFIL COM PRIVACIDADE
+// REGISTER
 // ============================
-export async function getUserProfile(req, res, next) {
+export async function register(req, res, next) {
   try {
-    const { nickName } = req.params;
-
-    const result = await getUserProfileService(nickName, req.user);
-
-    return res.json(result);
-
+    const result = await registerUser(req.body);
+    return res.status(201).json(result);
   } catch (err) {
     next(err);
   }
@@ -28,16 +23,12 @@ export async function getUserProfile(req, res, next) {
 
 
 // ============================
-// LISTAR USERS (ADMIN)
+// LOGIN
 // ============================
-export async function getAllUsers(req, res, next) {
+export async function login(req, res, next) {
   try {
-    const { page, pageSize } = req.query;
-
-    const result = await getAllUsersService(page, pageSize);
-
+    const result = await loginUser(req.body);
     return res.json(result);
-
   } catch (err) {
     next(err);
   }
@@ -45,17 +36,13 @@ export async function getAllUsers(req, res, next) {
 
 
 // ============================
-// VER MEDIA DE UM USER
+// LOGOUT
 // ============================
-export async function getUserMedia(req, res, next) {
+export async function logout(req, res, next) {
   try {
-    const { nickName } = req.params;
-    const { page, pageSize } = req.query;
-
-    const result = await getUserMediaService(nickName, page, pageSize);
-
+    const { refreshToken } = req.body;
+    const result = await logoutUser(refreshToken);
     return res.json(result);
-
   } catch (err) {
     next(err);
   }
@@ -63,14 +50,13 @@ export async function getUserMedia(req, res, next) {
 
 
 // ============================
-// ATUALIZAR PERFIL
+// FORGOT PASSWORD
 // ============================
-export async function updateProfile(req, res, next) {
+export async function forgotPassword(req, res, next) {
   try {
-    const result = await updateUserProfileService(req.user.id, req.body);
-
+    const { email } = req.body;
+    const result = await forgotPasswordService(email);
     return res.json(result);
-
   } catch (err) {
     next(err);
   }
@@ -78,29 +64,13 @@ export async function updateProfile(req, res, next) {
 
 
 // ============================
-// ATUALIZAR PRIVACIDADE
+// RESET PASSWORD
 // ============================
-export async function updatePrivacy(req, res, next) {
+export async function resetPassword(req, res, next) {
   try {
-    const result = await updateUserPrivacyService(req.user.id, req.body.privacy);
-
+    const { token, newPassword } = req.body;
+    const result = await resetPasswordService(token, newPassword);
     return res.json(result);
-
-  } catch (err) {
-    next(err);
-  }
-}
-
-
-// ============================
-// ATUALIZAR AVATAR
-// ============================
-export async function updateAvatar(req, res, next) {
-  try {
-    const result = await updateUserAvatarService(req.user.id, req.body.avatar);
-
-    return res.json(result);
-
   } catch (err) {
     next(err);
   }
