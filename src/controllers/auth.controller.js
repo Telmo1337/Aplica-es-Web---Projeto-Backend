@@ -9,13 +9,33 @@ import {
 } from "../services/auth.service.js";
 
 
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  logoutSchema,
+  registerSchema,
+  resetPasswordSchema
+} from "../schemas/auth.schema.js";
+
+
+import { validateSchema } from "../utils/validation.js";
+
+
+
 // ============================
 // REGISTER
 // ============================
 export async function register(req, res, next) {
   try {
-    const result = await registerUser(req.body);
+
+    const body = validateSchema(registerSchema, req.body);
+
+
+    const result = await registerUser(body);
+
+
     return res.status(201).json(result);
+
   } catch (err) {
     next(err);
   }
@@ -27,8 +47,14 @@ export async function register(req, res, next) {
 // ============================
 export async function login(req, res, next) {
   try {
-    const result = await loginUser(req.body);
+
+    const body = validateSchema(loginSchema, req.body);
+
+    const result = await loginUser(body);
+
+
     return res.json(result);
+
   } catch (err) {
     next(err);
   }
@@ -54,9 +80,14 @@ export async function logout(req, res, next) {
 // ============================
 export async function forgotPassword(req, res, next) {
   try {
-    const { email } = req.body;
+    
+    
+    const { email } = validateSchema(forgotPasswordSchema, req.body);
+    
     const result = await forgotPasswordService(email);
+   
     return res.json(result);
+  
   } catch (err) {
     next(err);
   }
@@ -68,9 +99,15 @@ export async function forgotPassword(req, res, next) {
 // ============================
 export async function resetPassword(req, res, next) {
   try {
-    const { token, newPassword } = req.body;
+
+   
+    const { token, newPassword } = validateSchema(resetPasswordSchema, req.body);
+    
+    
     const result = await resetPasswordService(token, newPassword);
+   
     return res.json(result);
+  
   } catch (err) {
     next(err);
   }

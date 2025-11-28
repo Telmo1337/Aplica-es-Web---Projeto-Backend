@@ -1,4 +1,5 @@
 // Controller da biblioteca: trata request/response e chama a camada de serviços
+import { z } from "zod";
 
 import {
   getPublicLibraryService,
@@ -12,10 +13,18 @@ import {
 } from "../services/library.service.js";
 
 
+import { updateLibrarySchema } from "../schemas/library.schema.js";
+import { validateSchema } from "../utils/validation.js";
+
+
 // Biblioteca pública de outro user
 export async function getPublicLibrary(req, res, next) {
   try {
-    const result = await getPublicLibraryService(req.params.nickName);
+    const { nickName } = validateSchema(
+      z.object({ nickName: z.string().min(1, "Nickname is required") }),
+      req.params
+    );
+    const result = await getPublicLibraryService(nickName);
     res.json(result);
   } catch (err) { next(err); }
 }
@@ -60,10 +69,15 @@ export async function getUserLibrary(req, res, next) {
 // Atualizar entrada
 export async function updateLibraryEntry(req, res, next) {
   try {
+    const { mediaId } = validateSchema(
+      z.object({ mediaId: z.string().uuid("Invalid media id") }),
+      req.params
+    );
+    const body = validateSchema(updateLibrarySchema, req.body);
     const result = await updateLibraryEntryService(
       req.user.id,
-      req.params.mediaId,
-      req.body
+      mediaId,
+      body
     );
     res.json(result);
   } catch (err) { next(err); }
@@ -73,16 +87,25 @@ export async function updateLibraryEntry(req, res, next) {
 // Adicionar media à biblioteca
 export async function addToLibrary(req, res, next) {
   try {
-    const result = await addToLibraryService(req.user.id, req.params.mediaId);
+    const { mediaId } = validateSchema(
+      z.object({ mediaId: z.string().uuid("Invalid media id") }),
+      req.params
+    );
+    const result = await addToLibraryService(req.user.id, mediaId);
     res.status(201).json(result);
   } catch (err) { next(err); }
 }
 
 
+
 // Remover media da biblioteca
 export async function removeFromLibrary(req, res, next) {
   try {
-    const result = await removeFromLibraryService(req.user.id, req.params.mediaId);
+    const { mediaId } = validateSchema(
+      z.object({ mediaId: z.string().uuid("Invalid media id") }),
+      req.params
+    );
+    const result = await removeFromLibraryService(req.user.id, mediaId);
     res.json(result);
   } catch (err) { next(err); }
 }

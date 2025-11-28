@@ -1,5 +1,9 @@
 // Controller: recebe pedidos HTTP e delega para a camada de serviços
 
+import { z } from "zod";
+
+//importar funções de serviço
+//import service functions
 import {
   getUserProfileService,
   getAllUsersService,
@@ -10,12 +14,27 @@ import {
 } from "../services/user.service.js";
 
 
+//importar schemas para validação
+//import schemas for validation
+import {
+  updateAvatarSchema,
+  updatePrivacySchema,
+  updateProfileSchema
+} from "../schemas/user.schema.js";
+//import função de validação
+//import validation function
+import { validateSchema } from "../utils/validation.js";
+
+
 // ============================
 // VER PERFIL COM PRIVACIDADE
 // ============================
 export async function getUserProfile(req, res, next) {
   try {
-    const { nickName } = req.params;
+    const { nickName } = validateSchema(
+      z.object({ nickName: z.string().min(1, "Nickname is required") }),
+      req.params
+    );
 
     const result = await getUserProfileService(nickName, req.user);
 
@@ -49,7 +68,11 @@ export async function getAllUsers(req, res, next) {
 // ============================
 export async function getUserMedia(req, res, next) {
   try {
-    const { nickName } = req.params;
+  
+    const { nickName } = validateSchema(
+      z.object({ nickName: z.string().min(1, "Nickname is required") }),
+      req.params
+    );
     const { page, pageSize } = req.query;
 
     const result = await getUserMediaService(nickName, page, pageSize);
@@ -67,7 +90,8 @@ export async function getUserMedia(req, res, next) {
 // ============================
 export async function updateProfile(req, res, next) {
   try {
-    const result = await updateUserProfileService(req.user.id, req.body);
+    const body = validateSchema(updateProfileSchema, req.body);
+    const result = await updateUserProfileService(req.user.id, body);
 
     return res.json(result);
 
@@ -82,7 +106,8 @@ export async function updateProfile(req, res, next) {
 // ============================
 export async function updatePrivacy(req, res, next) {
   try {
-    const result = await updateUserPrivacyService(req.user.id, req.body.privacy);
+    const { privacy } = validateSchema(updatePrivacySchema, req.body);
+    const result = await updateUserPrivacyService(req.user.id, privacy);
 
     return res.json(result);
 
@@ -97,7 +122,8 @@ export async function updatePrivacy(req, res, next) {
 // ============================
 export async function updateAvatar(req, res, next) {
   try {
-    const result = await updateUserAvatarService(req.user.id, req.body.avatar);
+    const { avatar } = validateSchema(updateAvatarSchema, req.body);
+    const result = await updateUserAvatarService(req.user.id, avatar);
 
     return res.json(result);
 

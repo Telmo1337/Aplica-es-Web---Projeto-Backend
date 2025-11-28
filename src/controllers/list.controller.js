@@ -11,10 +11,19 @@ import {
 } from "../services/list.service.js";
 
 
+import { z } from "zod";
+import { listCreateSchema, listPrivacySchema } from "../schemas/list.schema.js";
+import { validateSchema } from "../utils/validation.js";
+
+
+
+
 // Criar lista
 export async function createList(req, res, next) {
   try {
-    const result = await createListService(req.user.id, req.body);
+  
+    const body = validateSchema(listCreateSchema, req.body);
+    const result = await createListService(req.user.id, body);
     res.status(201).json(result);
   } catch (err) { next(err); }
 }
@@ -32,7 +41,12 @@ export async function getMyLists(req, res, next) {
 // Ver lista por ID respeitando privacidade
 export async function getListById(req, res, next) {
   try {
-    const result = await getListByIdService(req.params.listId, req.user.id);
+    
+    const { listId } = validateSchema(
+      z.object({ listId: z.string().uuid("Invalid list id") }),
+      req.params
+    );
+    const result = await getListByIdService(listId, req.user.id);
     res.json(result);
   } catch (err) { next(err); }
 }
@@ -41,16 +55,26 @@ export async function getListById(req, res, next) {
 // Apagar lista
 export async function deleteList(req, res, next) {
   try {
-    const result = await deleteListService(req.params.listId, req.user.id);
+   
+    const { listId } = validateSchema(
+      z.object({ listId: z.string().uuid("Invalid list id") }),
+      req.params
+    );
+    const result = await deleteListService(listId, req.user.id);
     res.json(result);
   } catch (err) { next(err); }
 }
 
-
 // Alterar privacidade da lista
 export async function changeListPrivacy(req, res, next) {
   try {
-    const result = await changeListPrivacyService(req.params.listId, req.user.id, req.body);
+  
+    const { listId } = validateSchema(
+      z.object({ listId: z.string().uuid("Invalid list id") }),
+      req.params
+    );
+    const body = validateSchema(listPrivacySchema, req.body);
+    const result = await changeListPrivacyService(listId, req.user.id, body);
     res.json(result);
   } catch (err) { next(err); }
 }
@@ -59,7 +83,14 @@ export async function changeListPrivacy(req, res, next) {
 // Adicionar media à lista
 export async function addMediaToList(req, res, next) {
   try {
-    const result = await addMediaToListService(req.params.listId, req.params.mediaId, req.user.id);
+    const { listId, mediaId } = validateSchema(
+      z.object({
+        listId: z.string().uuid("Invalid list id"),
+        mediaId: z.string().uuid("Invalid media id")
+      }),
+      req.params
+    );
+    const result = await addMediaToListService(listId, mediaId, req.user.id);
     res.status(201).json(result);
   } catch (err) { next(err); }
 }
@@ -68,7 +99,15 @@ export async function addMediaToList(req, res, next) {
 // Remover media da lista
 export async function removeMediaFromList(req, res, next) {
   try {
-    const result = await removeMediaFromListService(req.params.listId, req.params.mediaId, req.user.id);
+  
+    const { listId, mediaId } = validateSchema(
+      z.object({
+        listId: z.string().uuid("Invalid list id"),
+        mediaId: z.string().uuid("Invalid media id")
+      }),
+      req.params
+    );
+    const result = await removeMediaFromListService(listId, mediaId, req.user.id);
     res.json(result);
   } catch (err) { next(err); }
 }
