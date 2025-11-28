@@ -137,11 +137,35 @@ export async function updateLibraryEntryService(userId, mediaId, body) {
     throw new Error(parsed.error.errors[0].message);
   }
 
+  const update = { ...parsed.data };
+
+  if(parsed.data.watched === true) {
+    update.status = "WATCHED";
+
+  }
+
+  if(parsed.data.status === "WATCHED"){
+    update.watched = true;
+  }
+
+  if(parsed.data.status === "WANT_TO_WATCH"){
+    update.watched = false;
+    update.calendarAt = null;
+  }
+
+  if(parsed.data.status === "WATCHING"){
+    update.watched = false;
+  }
+
+  if(parsed.data.status === "ABANDONED"){
+    update.watched = false;
+  }
+
   const updated = await prisma.userMedia.update({
     where: {
       userId_mediaId: { userId, mediaId }
     },
-    data: parsed.data
+    data: update
   });
 
   return updated;

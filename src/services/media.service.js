@@ -261,7 +261,6 @@ export async function searchMediaByTitleService(query) {
   const where = {
     title: {
       contains: title,
-      mode: "insensitive"
     }
   };
 

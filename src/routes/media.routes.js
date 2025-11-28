@@ -1,9 +1,10 @@
-// Rotas responsáveis pela gestão de filmes e séries (media)
+//Rotas responsáveis pela gestão de filmes e séries (media)
 
 import { Router } from "express";
-import { verifyToken } from "../utils/auth.js";
+import { verifyToken, requireAdmin } from "../utils/auth.js";
 
-// Controllers
+//importar funções do controller
+//import media controller functions
 import {
   getTopMovies,
   getTopSeries,
@@ -22,41 +23,51 @@ import {
 const router = Router();
 
 
-// Top 10 filmes
+//Top 10 filmes
 router.get("/top/global/movies", verifyToken, getTopMovies);
 
-// Top 10 séries
+//Top 10 séries
 router.get("/top/global/series", verifyToken, getTopSeries);
 
-// Ranking geral
+//ranking geral
+//global ranking
 router.get("/ranking", verifyToken, getGlobalRanking);
-
-// Filtrar por categoria
+  
+//Filtrar por categoria
+//filter by category
 router.get("/bycategory", verifyToken, getMediaByCategory);
 
-// Criar comentário num media
+//criar comentário para um media
+//create comment for a media
 router.post("/:mediaId/comments", verifyToken, createComment);
 
-// Listar comentários
+//ver comentários de um media
+//view comments of a media
 router.get("/:mediaId/comments", listComments);
 
-// Criar media
-router.post("/", verifyToken, createMedia);
+//criar media (apenas admin)
+//create media (only admin)
+router.post("/", verifyToken, requireAdmin, createMedia);
 
-// Listar todos media com paginação e ordenação
+//obter todos media com paginação e ordenação
+//get all media with pagination and sorting
 router.get("/", verifyToken, listAllMedia);
 
-// Pesquisar por título
+//pesquisar por título
+//search by title
 router.get("/search", verifyToken, searchMediaByTitle);
 
-// Obter media por ID
+//obter media por ID
+//get media by ID
 router.get("/:id", verifyToken, getMediaById);
 
-// Atualizar media
-router.put("/:id", verifyToken, updateMedia);
+//atualizar dados do media - apenas o admin
+//update media - only admin
+router.put("/:id", verifyToken, requireAdmin, updateMedia);
 
-// Apagar media
-router.delete("/:id", verifyToken, deleteMedia);
+//apagar media - apenas o admin
+//delete media - only admin
+router.delete("/:id", verifyToken, requireAdmin, deleteMedia);
 
 
 export default router;
