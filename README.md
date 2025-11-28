@@ -10,6 +10,22 @@ Backend Project using Node, Express, Prisma ORM and MySQL (Dockerized).
 This repository contains a complete backend API for managing movies and series.  
 It includes user authentication, media management, personal libraries, comments, and more.
 
+
+## Table of Contents
+- [About the Project](#cinexio---web-applications-movie--series-management-api)
+- [Installation and Execution](#installation-and-execution)
+- [Requirements](#1-requirements)
+- [Clone the Repository](#2-clone-the-repository)
+- [Ensure Docker Is Running](#3-ensure-docker-is-running)
+- [Start Environment](#4-start-the-environment-backend--db)
+- [Access the API](#5-access-the-api)
+- [Postman Collection](#6-postman-collection--environment)
+- [Optional Commands](#7-optional)
+- [Stop Environment](#8-how-to-stop-the-environment)
+- [Important Notes](#important-to-know)
+
+
+
 # Installation and Execution
 
 The entire project run automatically through **Docker Compose**, without requiring:
